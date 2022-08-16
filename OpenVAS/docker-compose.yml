@@ -1,0 +1,24 @@
+version: "3"
+services:
+    gvm:
+        container_name: openvas
+        image: docker.digitalmatriks.co.id/zchrhzkl/css-pt:20.08
+        volumes:
+          - ./gvm/postgres-db:/opt/database
+          - ./gvm/gvm-data:/var/lib/gvm
+          - ./gvm/openvas-plugins:/var/lib/openvas/plugins
+        environment:
+          - USERNAME="admin"
+          - PASSWORD="admin"
+          - RELAYHOST="smtp"
+          - SMTPPORT=25
+          - AUTO_SYNC=true
+          - HTTPS=true
+          - TZ="Asia/Jakarta"
+          - SSHD=false
+          - DB_PASSWORD="none"
+        ports:
+          - "8080:9392"  # Web interface
+          - "5432:5432" # Access PostgreSQL database from external tools
+          #- "2222:22"   # SSH for remote sensors
+        restart: unless-stopped

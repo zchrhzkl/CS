@@ -1,0 +1,44 @@
+---
+version: "3.9"
+
+services:
+
+    cortex:
+        image: thehiveproject/cortex:latest
+        container_name: cortex
+        restart: unless-stopped
+        environment:
+            - JOB_DIRECTORY=/opt/cortex/jobs
+        ports:
+            - "0.0.0.0:9001:9001"
+        volumes:
+            - ./cortex/application.conf:/etc/cortex/application.conf
+            - /opt/cortex/jobs:/opt/cortex/jobs
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./cortex/log/:/var/log/cortex
+            - /tmp:/tmp
+        command: '--no-config --no-config-secret'
+        networks:
+            - Hive
+
+    thehive:
+        image: thehiveproject/thehive4:latest
+        container_name: thehive
+        restart: unless-stopped
+        #embedded default admin@thehive.local:secret
+        depends_on:
+            - cortex
+        ports:
+            - "0.0.0.0:9000:9000"
+        volumes:
+            - ./thehive/application.conf:/etc/thehive/application.conf
+            - ./thehive/db:/opt/thp/thehive/db
+            - ./thehive/index:/opt/thp/thehive/index
+            - ./thehive/data:/opt/thp/thehive/data
+        command: '--no-config --no-config-secret'
+        networks:
+            - Hive
+
+networks:
+    Hive:
+        driver: bridge

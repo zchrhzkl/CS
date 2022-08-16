@@ -1,0 +1,42 @@
+---
+version: "3.6"
+services:
+  server:
+    image: gynter/rsyslog-relp:alpine
+    environment:
+      # Set the time zone for container.
+      - TZ=Asia/Jakarta
+      - RSYSLOG_TLS_PERMITTED_PEER=rsyslog-docker-example_local-forwarder_1
+    networks:
+      - rsyslog
+    volumes:
+      - ./pki/server:/etc/pki/rsyslog:ro
+      - ./server/90-local-all-log.conf:/etc/rsyslog.d/90-local-all-log.conf
+      - server-logs:/logs
+    ports:
+      - 2514:2514/tcp
+      - 514:514
+      - 514:514/udp
+
+  local-forwarder:
+    image: gynter/rsyslog-local-forwarder:alpine
+    entrypoint: /entrypoint.sh
+    environment:
+      - TZ=Asia/Jakarta
+      - RSYSLOG_TLS_PERMITTED_PEER=rsyslog-docker-example_server_1
+      - RSYSLOG_RELP_TARGET=rsyslog-docker-example-server-1
+      - RSYSLOG_RELP_TARGET_PORT=2514
+    networks:
+      - rsyslog
+    volumes:
+      - ./pki/local-forwarder:/etc/pki/rsyslog:ro
+      - ./local-forwarder/20-local-all-log.conf:/etc/rsyslog.d/90-local-all-log.conf
+      - local-forwarder-logs:/logs
+      - ./local-forwarder/entrypoint.sh:/entrypoint.sh
+
+networks:
+  rsyslog:
+
+volumes:
+  server-logs:
+  local-forwarder-logs:

@@ -1,0 +1,15 @@
+version: "2.2"
+
+services:
+  arkime:
+    image: zchrhzkl/arkime:1.0.0
+    ports:
+      - 8005:8005
+    environment: 
+      - ES_HOST= elastic:Sovereign78Z@192.168.100.5
+      - ES_PORT= 9200
+networks:
+  default:
+    external:
+      name: elk_default
+       
